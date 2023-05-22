@@ -1,0 +1,162 @@
+apply plugin: "maven-publish"
+apply plugin: "fabric-loom"
+apply plugin: "io.github.juuxel.loom-quiltflower"
+apply plugin: "com.replaymod.preprocess"
+apply plugin: "me.fallenbreath.yamlang"
+apply plugin: 'com.modrinth.minotaur'
+apply plugin: "com.github.breadmoirai.github-release"
+
+int mcVersion = 1
+
+preprocess {
+    mcVersion = vars.get()["MC"]
+    tabIndentation = false
+}
+
+repositories {
+    maven { url "https://jitpack.io" }
+    maven {
+        name = "Curseforge"
+        url = "https://www.cursemaven.com"
+    }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+    }
+    maven {
+        name = "Gradle Plugin Portal"
+        url = "https://plugins.gradle.org/m2/"
+    }
+//	maven {
+//		name = "TerraformersMC"
+//		url "https://maven.terraformersmc.com/releases/"
+//	}
+}
+
+// https://github.com/FabricMC/fabric-loader/issues/783
+configurations {
+    modRuntimeOnly.exclude group: "net.fabricmc", module: "fabric-loader"
+}
+
+dependencies {
+    // loom
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    // dependencies
+//	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+//	include api(annotationProcessor("com.github.LlamaLad7.mixinextras:mixinextras-fabric:${project.mixin_extras_version}"))
+
+//	modApi "com.terraformersmc:modmenu:${project.modmenu_version}"
+}
+
+loom {
+    runConfigs.all {
+        // to make sure it generates all "Minecraft Client (:subproject_name)" applications
+        ideConfigGenerated = true
+        runDir "../../run"
+        vmArgs "-Dmixin.debug.export=true"
+    }
+}
+
+remapJar {
+    remapperIsolation = true
+}
+
+if (mcVersion >= 11800) {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+} else if (mcVersion >= 11700) {
+    sourceCompatibility = JavaVersion.VERSION_16
+    targetCompatibility = JavaVersion.VERSION_16
+} else {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+archivesBaseName = project.archives_base_name + "-" + project.mod_version + "+" + project.game_versions
+
+processResources {
+    inputs.property "version", project.mod_version
+
+    filesMatching("fabric.mod.json") {
+        def valueMap = [
+                "id"                  : project.mod_id,
+                "name"                : project.mod_name,
+                "version"             : project.mod_version,
+                "minecraft_dependency": project.minecraft_dependency,
+        ]
+        expand valueMap
+    }
+}
+
+// https://github.com/Fallen-Breath/yamlang
+yamlang {
+    targetSourceSets = [sourceSets.main]
+    inputDir = "assets/${project.mod_id}/lang"
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+java {
+    withSourcesJar()
+}
+
+jar {
+    from(rootProject.file("LICENSE")) {
+        rename { "${it}_${project.archivesBaseName}" }
+    }
+}
+
+modrinth {
+	token = env.fetchOrNull("MODRINTH_TOKEN")
+	projectId = project.mod_id
+	versionName = project.mod_name + " " + project.mod_version + " for " + project.game_versions
+	versionNumber = project.mod_version
+	versionType = "release"
+	uploadFile = remapJar
+	additionalFiles = [sourcesJar]
+	gameVersions = project.modrinth_versions.split(" ").toList()
+	loaders = ["fabric", "quilt"]
+	dependencies {
+
+	}
+	syncBodyFrom = rootProject.file("README.md").text
+	changelog = rootProject.file("CHANGELOG.md").text
+	failSilently = true
+	debugMode = true // safety, disable to actually publish
+}
+
+githubRelease {
+    token = env.fetch("GITHUB_TOKEN", "")
+    owner = project.repo_owner
+    repo = project.mod_id
+    tagName = "v${project.mod_version}"
+    targetCommitish = "multi"
+    releaseName = project.mod_name + " " + project.mod_version
+    body = rootProject.file("CHANGELOG.md").text
+    draft = mcVersion > 11605 // first file should be false
+    releaseAssets = [remapJar, sourcesJar]
+    allowUploadToExisting = true // allows publishing multiple files
+    dryRun = true // safety, disable to actually publish
+}
+
+// configure the maven publication
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId archivesBaseName
+
+            from components.java
+        }
+    }
+
+    // select the repositories you want to publish to
+    repositories {
+        // uncomment to publish to the local maven
+        // mavenLocal()
+    }
+}

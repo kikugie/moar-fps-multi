@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}",
+  "version": "${version}",
+  "name": "${name}",
+  "description": "",
+  "authors": [
+    "KikuGie"
+  ],
+  "contact": {
+  },
+  "license": "LGPL-3.0",
+  "icon": "assets/template_mod/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "me.kikugie.template_mod.TemplateMod"
+    ],
+    "client": [
+      "me.kikugie.template_mod.TemplateModClient"
+    ]
+  },
+  "mixins": [
+    "template_mod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.4",
+    "minecraft": "${minecraft_dependency}"
+  }
+}

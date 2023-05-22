@@ -1,0 +1,70 @@
+plugins {
+    id 'maven-publish'
+    id 'fabric-loom' version '1.2-SNAPSHOT' apply false
+
+    // https://github.com/Juuxel/LoomQuiltflower
+    id 'io.github.juuxel.loom-quiltflower' version '1.8.0' apply false
+
+    // https://github.com/ReplayMod/preprocessor
+    // https://github.com/Fallen-Breath/preprocessor
+    id 'com.replaymod.preprocess' version 'e1050f4d72'
+
+    // https://github.com/Fallen-Breath/yamlang
+    id 'me.fallenbreath.yamlang' version '1.2.1' apply false
+
+    // https://github.com/modrinth/minotaur
+    id "com.modrinth.minotaur" version "2.+" apply false
+
+    // https://github.com/BreadMoirai/github-release-gradle-plugin
+    id "com.github.breadmoirai.github-release" version "2.4.+" apply false
+
+    // https://github.com/uzzu/dotenv-gradle
+    id "co.uzzu.dotenv.gradle" version "2.0.0"
+}
+
+preprocess {
+    def mc14 = createNode('1.14.4', 1_14_04, 'yarn')
+    def mc15 = createNode('1.15.2', 1_15_02, 'yarn')
+    def mc16 = createNode('1.16.5', 1_16_05, 'yarn')
+    def mc17 = createNode('1.17.1', 1_17_01, 'yarn')
+    def mc18 = createNode('1.18.2', 1_18_02, 'yarn')
+    def mc19 = createNode('1.19.x', 1_19_04, 'yarn')
+
+    mc15.link(mc14, null)
+    mc16.link(mc15, null)
+    mc17.link(mc16, null)
+    mc18.link(mc17, null)
+    mc19.link(mc18, null)
+}
+
+tasks.register('buildAndGather') {
+    subprojects {
+        dependsOn project.name + ':build'
+    }
+    doFirst {
+        println 'Gathering builds'
+        copy {
+            subprojects {
+                def libDir = project.projectDir.toPath().resolve('build/libs')
+                from(libDir) {
+                    include '*.jar'
+                    exclude '*-dev.jar', '*-sources.jar'
+                }
+                into 'build/libs/'
+                duplicatesStrategy DuplicatesStrategy.INCLUDE
+            }
+        }
+    }
+}
+
+tasks.register('cleanPreprocessSources') {
+    doFirst {
+        subprojects {
+            def path = project.projectDir.toPath().resolve('build/preprocessed')
+            path.toFile().deleteDir()
+
+            def resPath = project.projectDir.toPath().resolve('build/resources')
+            resPath.toFile().deleteDir()
+        }
+    }
+}
