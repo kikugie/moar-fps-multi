@@ -27,10 +27,18 @@ repositories {
         name = "Gradle Plugin Portal"
         url = "https://plugins.gradle.org/m2/"
     }
-//	maven {
-//		name = "TerraformersMC"
-//		url "https://maven.terraformersmc.com/releases/"
-//	}
+    maven {
+        name = "TerraformersMC"
+        url = "https://maven.terraformersmc.com/releases/"
+    }
+    maven {
+        name = "Xander Maven"
+        url = "https://maven.isxander.dev/releases"
+    }
+    maven {
+        name = "Shedaniel Maven"
+        url = "https://maven.shedaniel.me/"
+    }
 }
 
 // https://github.com/FabricMC/fabric-loader/issues/783
@@ -45,10 +53,16 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // dependencies
-//	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    modImplementation fabricApi.module("fabric-command-api-${mcVersion > 11802 ? "v2" : "v1"}", project.fabric_api_version)
 //	include api(annotationProcessor("com.github.LlamaLad7.mixinextras:mixinextras-fabric:${project.mixin_extras_version}"))
 
-//	modApi "com.terraformersmc:modmenu:${project.modmenu_version}"
+	modApi "com.terraformersmc:modmenu:${project.modmenu_version}"
+    modApi ("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+    if (mcVersion > 11802) {
+        modImplementation "dev.isxander.yacl:yet-another-config-lib-fabric:${yacl_version}"
+    }
 }
 
 loom {
@@ -112,22 +126,22 @@ jar {
 }
 
 modrinth {
-	token = env.fetchOrNull("MODRINTH_TOKEN")
-	projectId = project.mod_id
-	versionName = project.mod_name + " " + project.mod_version + " for " + project.game_versions
-	versionNumber = project.mod_version
-	versionType = "release"
-	uploadFile = remapJar
-	additionalFiles = [sourcesJar]
-	gameVersions = project.modrinth_versions.split(" ").toList()
-	loaders = ["fabric", "quilt"]
-	dependencies {
+    token = env.fetchOrNull("MODRINTH_TOKEN")
+    projectId = project.mod_id
+    versionName = project.mod_name + " " + project.mod_version + " for " + project.game_versions
+    versionNumber = project.mod_version
+    versionType = "release"
+    uploadFile = remapJar
+    additionalFiles = [sourcesJar]
+    gameVersions = project.modrinth_versions.split(" ").toList()
+    loaders = ["fabric", "quilt"]
+    dependencies {
 
-	}
-	syncBodyFrom = rootProject.file("README.md").text
-	changelog = rootProject.file("CHANGELOG.md").text
-	failSilently = true
-	debugMode = true // safety, disable to actually publish
+    }
+    syncBodyFrom = rootProject.file("README.md").text
+    changelog = rootProject.file("CHANGELOG.md").text
+    failSilently = true
+    debugMode = true // safety, disable to actually publish
 }
 
 githubRelease {
