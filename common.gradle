@@ -3,8 +3,9 @@ apply plugin: "fabric-loom"
 apply plugin: "io.github.juuxel.loom-quiltflower"
 apply plugin: "com.replaymod.preprocess"
 apply plugin: "me.fallenbreath.yamlang"
-apply plugin: 'com.modrinth.minotaur'
+apply plugin: "com.modrinth.minotaur"
 apply plugin: "com.github.breadmoirai.github-release"
+apply plugin: "com.matthewprenger.cursegradle"
 
 int mcVersion = 1
 
@@ -136,12 +137,33 @@ modrinth {
     gameVersions = project.game_versions.split(" ").toList()
     loaders = ["fabric", "quilt"]
     dependencies {
-
+        required.project "fabric-api"
+        optional.project "cloth-config"
+        if (mcVersion > 11900) {
+            optional.project "yacl"
+        }
     }
     syncBodyFrom = rootProject.file("README.md").text
     changelog = rootProject.file("CHANGELOG.md").text
     failSilently = true
     debugMode = true // safety, disable to actually publish
+}
+
+curseforge {
+    apiKey = env.fetch("CURSEFORGE_TOKEN", "")
+    //noinspection GroovyAssignabilityCheck
+    project {
+        id = "658791"
+        releaseType = "beta"
+        changelog = rootProject.file("CHANGELOG.md").text
+        for (String version : project.game_versions.split(" ").toList()) {
+            addGameVersion version
+        }
+        mainArtifact(remapJar) {
+            displayName = project.mod_name + " " + project.mod_version + " for " + project.title_version
+        }
+    }
+    debug = true
 }
 
 githubRelease {
