@@ -25,7 +25,6 @@ import me.kikugie.moarfps.config.ConfigState;
 import net.fabricmc.api.ClientModInitializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 //#if MC > 11802
 //$$ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 //#else
@@ -35,17 +34,19 @@ import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 public class MoarFPS implements ClientModInitializer {
     public static final Logger LOGGER = LogManager.getLogger();
     private static ConfigState configState;
+
+    public static ConfigState getConfig() {
+        return configState;
+    }
+
     @Override
     public void onInitializeClient() {
+        Reference.init();
         configState = ConfigState.load();
         //#if MC <= 11802
         ConfigCommand.register(ClientCommandManager.DISPATCHER);
         //#else
         //$$ ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> ConfigCommand.register(dispatcher));
         //#endif
-    }
-
-    public static ConfigState getConfig() {
-        return configState;
     }
 }

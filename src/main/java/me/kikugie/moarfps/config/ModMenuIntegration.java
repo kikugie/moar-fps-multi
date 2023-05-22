@@ -9,9 +9,9 @@ public class ModMenuIntegration implements ModMenuApi {
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
         if (FabricLoader.getInstance().isModLoaded("yet-another-config-lib")) {
             return YaclConfig::createGui;
-        } else if (FabricLoader.getInstance().isModLoaded("cloth-config")) {
+        } else if (FabricLoader.getInstance().isModLoaded("cloth-config") || FabricLoader.getInstance().isModLoaded("cloth-config2")) {
             return ClothConfig::createGui;
         }
-        return null;
+        return (parent) -> parent;
     }
 }
