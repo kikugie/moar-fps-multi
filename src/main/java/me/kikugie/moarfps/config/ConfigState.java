@@ -39,7 +39,11 @@ public class ConfigState {
         if (CONFIG_FILE.exists()) {
             try {
                 String jsonString = FileUtils.readFileToString(CONFIG_FILE, StandardCharsets.UTF_8);
-                JsonElement json = new JsonParser().parse(jsonString);
+                //#if MC > 11900
+                JsonElement json = JsonParser.parseString(jsonString);
+                //#else
+                //$$ JsonElement json = new JsonParser().parse(jsonString);
+                //#endif
                 return CODEC.parse(JsonOps.INSTANCE, json)
                         .resultOrPartial(s -> MoarFPS.LOGGER.error("Error reading config data!\n{}", s))
                         .orElseThrow(() -> new NoSuchElementException("No value present"));

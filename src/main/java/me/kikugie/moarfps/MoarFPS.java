@@ -23,8 +23,11 @@ package me.kikugie.moarfps;
 import me.kikugie.moarfps.config.ConfigCommand;
 import me.kikugie.moarfps.config.ConfigState;
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import java.util.function.Function;
 //#if MC > 11802
 //$$ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 //#else
@@ -33,6 +36,7 @@ import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 
 public class MoarFPS implements ClientModInitializer {
     public static final Logger LOGGER = LogManager.getLogger();
+    public static final Function<Boolean, Text> YES_NO = (val) -> val ? translated("moarfps.config.yes") : translated("moarfps.config.no");
     private static ConfigState configState;
 
     public static ConfigState getConfig() {
@@ -47,6 +51,22 @@ public class MoarFPS implements ClientModInitializer {
         ConfigCommand.register(ClientCommandManager.DISPATCHER);
         //#else
         //$$ ClientCommandRegistrationCallback.EVENT.register((dispatcher, access) -> ConfigCommand.register(dispatcher));
+        //#endif
+    }
+
+//    public static Text translated(String key, Object... args) {
+//        //#if MC <= 11802
+//        return new TranslatableText(key, args);
+//        //#else
+//        //$$ return Text.translatable(key, args);
+//        //#endif
+//    }
+
+    public static Text translated(String key) {
+        //#if MC <= 11802
+        return new TranslatableText(key);
+        //#else
+        //$$ return Text.translatable(key);
         //#endif
     }
 }

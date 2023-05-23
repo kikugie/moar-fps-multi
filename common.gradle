@@ -154,8 +154,12 @@ curseforge {
     //noinspection GroovyAssignabilityCheck
     project {
         id = "658791"
-        releaseType = "beta"
+        releaseType = "release"
         changelog = rootProject.file("CHANGELOG.md").text
+        changelogType = "markdown"
+        addGameVersion("Client")
+        addGameVersion("Fabric")
+        addGameVersion("Quilt")
         for (String version : project.game_versions.split(" ").toList()) {
             addGameVersion version
         }
@@ -169,7 +173,7 @@ curseforge {
 githubRelease {
     token = env.fetch("GITHUB_TOKEN", "")
     owner = project.repo_owner
-    repo = project.mod_id
+    repo = "moar-fps-multi"
     tagName = "v${project.mod_version}"
     targetCommitish = "multi"
     releaseName = project.mod_name + " " + project.mod_version
@@ -177,12 +181,17 @@ githubRelease {
     draft = mcVersion > 11605 // first file should be false
     releaseAssets = [remapJar, sourcesJar]
     allowUploadToExisting = true // allows publishing multiple files
+    prerelease = false
     dryRun = true // safety, disable to actually publish
 }
 
 // configure the maven publication
 publishing {
     publications {
+        modrinth
+        curseforge
+        githubRelease
+
         mavenJava(MavenPublication) {
             artifactId archivesBaseName
 
