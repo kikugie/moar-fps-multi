@@ -27,11 +27,12 @@ plugins {
 
 preprocess {
     def mc18 = createNode("1.18.2", 1_18_02, "yarn")
-    def mc19 = createNode("1.19.x", 1_19_04, "yarn")
-    mc19.link(mc18, null)
+    def mc19 = createNode("1.19.4", 1_19_04, "yarn")
+    mc18.link(mc19, file("versions/mapping-1.18.2-1.19.4.txt"))
 }
 
 tasks.register("buildAndGather") {
+    group("build")
     subprojects {
         dependsOn project.name + ":build"
     }

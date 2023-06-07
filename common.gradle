@@ -61,8 +61,11 @@ dependencies {
     modApi ("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    if (mcVersion > 11802) {
-        modImplementation "dev.isxander.yacl:yet-another-config-lib-fabric:${yacl_version}"
+    if (mcVersion > 11900) {
+        modImplementation "dev.isxander.yacl:yet-another-config-lib-fabric:${project.yacl3_version}"
+    }
+    if (mcVersion == 11904) {
+        modImplementation "maven.modrinth:yacl:${project.yacl_version}-fabric"
     }
 }
 
@@ -146,7 +149,7 @@ modrinth {
     syncBodyFrom = rootProject.file("README.md").text
     changelog = rootProject.file("CHANGELOG.md").text
     failSilently = true
-    debugMode = true // safety, disable to actually publish
+    debugMode = false // safety, disable to actually publish
 }
 
 curseforge {
@@ -157,9 +160,6 @@ curseforge {
         releaseType = "release"
         changelog = rootProject.file("CHANGELOG.md").text
         changelogType = "markdown"
-        addGameVersion("Client")
-        addGameVersion("Fabric")
-        addGameVersion("Quilt")
         for (String version : project.game_versions.split(" ").toList()) {
             addGameVersion version
         }
@@ -167,7 +167,7 @@ curseforge {
             displayName = project.mod_name + " " + project.mod_version + " for " + project.title_version
         }
     }
-    debug = true
+    debug = false
 }
 
 githubRelease {
@@ -178,20 +178,16 @@ githubRelease {
     targetCommitish = "multi"
     releaseName = project.mod_name + " " + project.mod_version
     body = rootProject.file("CHANGELOG.md").text
-    draft = mcVersion > 11605 // first file should be false
+    draft = mcVersion > 11900 // first file should be false
     releaseAssets = [remapJar, sourcesJar]
     allowUploadToExisting = true // allows publishing multiple files
     prerelease = false
-    dryRun = true // safety, disable to actually publish
+    dryRun = false // safety, disable to actually publish
 }
 
 // configure the maven publication
 publishing {
     publications {
-        modrinth
-        curseforge
-        githubRelease
-
         mavenJava(MavenPublication) {
             artifactId archivesBaseName
 

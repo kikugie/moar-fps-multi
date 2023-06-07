@@ -29,7 +29,7 @@ pluginManagement {
 
 def versions = Arrays.asList(
         "1.18.2",
-        "1.19.x",
+        "1.19.4",
 )
 for (String version : versions) {
     include(":$version")

@@ -11,15 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-//#if MC <= 11802
 import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v1.ClientCommandManager.literal;
-//#else
-//$$ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
-//$$ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
-//$$ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
-//#endif
 
 public class ConfigCommand {
     public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
